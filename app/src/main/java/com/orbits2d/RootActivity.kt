@@ -6,11 +6,16 @@ import android.graphics.Paint.Style
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.orbits2d.databinding.ActivityRootBinding
 
 class RootActivity : AppCompatActivity() {
     private var _binding:ActivityRootBinding? = null
     private val binding:ActivityRootBinding get() =  _binding ?: throw Exception("NPE for _binding RootActivity")
+
+    private val renderThread = RenderThread()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,8 +28,26 @@ class RootActivity : AppCompatActivity() {
     }
 
     private fun setUpTabs(){
-        binding.rootTab.addTab(binding.rootTab.newTab().apply {
-            text = "newTab"
+        val tabArray = arrayListOf("a_page","b_page")
+
+        tabArray.forEach {
+            binding.rootTab.addTab(binding.rootTab.newTab().apply {
+                text = it
+            })
+        }
+
+        binding.rootTab.addOnTabSelectedListener(object :OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                Snackbar.make(binding.rootTab,tab?.text.toString(),Snackbar.LENGTH_SHORT).show()
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                //TODO("Not yet implemented")
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                //TODO("Not yet implemented")
+            }
         })
     }
 
@@ -41,21 +64,23 @@ class RootActivity : AppCompatActivity() {
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {
-                //TODO("Not yet implemented")
+                renderThread.isRendering = false
+                renderThread.join()
             }
         })
     }
 
     private fun startRenderThread(renderTarget: SurfaceHolder){
-        val canvas = renderTarget.lockCanvas()
-        val paint = Paint().apply {
-            color = Color.RED
-            style = Paint.Style.FILL
-            textSize = 40.0f
+        renderThread.setHolder(renderTarget)
+
+        try {
+            renderThread.start()
         }
-
-        canvas.drawText("text",10.0f,50.0f,paint)
-
-        renderTarget.unlockCanvasAndPost(canvas)
+        catch (e:Exception){
+            Snackbar.make(binding.rootTab,e.message.toString(),Snackbar.LENGTH_SHORT).show()
+        }
+        finally {
+            renderTarget.unlockCanvasAndPost(renderTarget.lockCanvas())
+        }
     }
 }
