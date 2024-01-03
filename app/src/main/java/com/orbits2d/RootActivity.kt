@@ -1,8 +1,5 @@
 package com.orbits2d
 
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Paint.Style
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
@@ -60,11 +57,11 @@ class RootActivity : AppCompatActivity() {
             }
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-                //TODO("Not yet implemented")
+
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {
-                renderThread.isRendering = false
+                renderThread.running = false
                 renderThread.join()
             }
         })
@@ -72,15 +69,6 @@ class RootActivity : AppCompatActivity() {
 
     private fun startRenderThread(renderTarget: SurfaceHolder){
         renderThread.setHolder(renderTarget)
-
-        try {
-            renderThread.start()
-        }
-        catch (e:Exception){
-            Snackbar.make(binding.rootTab,e.message.toString(),Snackbar.LENGTH_SHORT).show()
-        }
-        finally {
-            renderTarget.unlockCanvasAndPost(renderTarget.lockCanvas())
-        }
+        renderThread.start()
     }
 }
