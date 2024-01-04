@@ -9,8 +9,9 @@ import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.orbits2d.databinding.ActivityRootBinding
 
 class RootActivity : AppCompatActivity() {
-    private var _binding:ActivityRootBinding? = null
-    private val binding:ActivityRootBinding get() =  _binding ?: throw Exception("NPE for _binding RootActivity")
+    private var _binding: ActivityRootBinding? = null
+    private val binding: ActivityRootBinding
+        get() = _binding ?: throw Exception("NPE for _binding RootActivity")
 
     private val renderThread = RenderThread()
 
@@ -24,8 +25,8 @@ class RootActivity : AppCompatActivity() {
         setUpSurface()
     }
 
-    private fun setUpTabs(){
-        val tabArray = arrayListOf("a_page","b_page")
+    private fun setUpTabs() {
+        val tabArray = arrayListOf("a_page", "b_page")
 
         tabArray.forEach {
             binding.rootTab.addTab(binding.rootTab.newTab().apply {
@@ -33,9 +34,9 @@ class RootActivity : AppCompatActivity() {
             })
         }
 
-        binding.rootTab.addOnTabSelectedListener(object :OnTabSelectedListener{
+        binding.rootTab.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                Snackbar.make(binding.rootTab,tab?.text.toString(),Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.rootTab, tab?.text.toString(), Snackbar.LENGTH_SHORT).show()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -48,10 +49,10 @@ class RootActivity : AppCompatActivity() {
         })
     }
 
-    private fun setUpSurface(){
+    private fun setUpSurface() {
         val holder = binding.renderSurface.holder
 
-        holder.addCallback(object :SurfaceHolder.Callback{
+        holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 startRenderThread(renderTarget = holder)
             }
@@ -67,7 +68,7 @@ class RootActivity : AppCompatActivity() {
         })
     }
 
-    private fun startRenderThread(renderTarget: SurfaceHolder){
+    private fun startRenderThread(renderTarget: SurfaceHolder) {
         renderThread.setHolder(renderTarget)
         renderThread.start()
     }

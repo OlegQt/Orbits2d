@@ -5,6 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.view.SurfaceHolder
+import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.orbits2d.entities.Renderable
 import com.orbits2d.entities.RoundObject
 import kotlin.random.Random
@@ -35,8 +37,6 @@ class RenderThread : Thread() {
                 try {
                     canvas = holder.lockCanvas()
                     canvas?.let { render(it) }
-                } catch (e: Exception) {
-                    //Snackbar.make(binding.rootTab,e.message.toString(), Snackbar.LENGTH_SHORT).show()
                 } finally {
                     canvas?.let { holder.unlockCanvasAndPost(it) }
                 }

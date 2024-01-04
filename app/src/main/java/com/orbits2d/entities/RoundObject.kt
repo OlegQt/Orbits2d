@@ -6,7 +6,7 @@ class RoundObject(x: Float, y: Float) : D3dObject(xPos = x, yPos = y), Renderabl
     private val radius = 12.0f
     override fun toPath(): Path {
         return Path().apply {
-            addCircle(x,y,radius,Path.Direction.CCW)
+            addCircle(x, y, radius, Path.Direction.CCW)
         }
     }
 }
