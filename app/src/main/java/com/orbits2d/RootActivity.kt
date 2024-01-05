@@ -1,9 +1,8 @@
 package com.orbits2d
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.SurfaceHolder
-import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.orbits2d.databinding.ActivityRootBinding
@@ -36,7 +35,8 @@ class RootActivity : AppCompatActivity() {
 
         binding.rootTab.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                Snackbar.make(binding.rootTab, tab?.text.toString(), Snackbar.LENGTH_SHORT).show()
+                tab?.let {
+                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -57,7 +57,7 @@ class RootActivity : AppCompatActivity() {
                 startRenderThread(renderTarget = holder)
             }
 
-            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+            override fun surfaceChanged(holder: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
 
             }
 
@@ -72,4 +72,5 @@ class RootActivity : AppCompatActivity() {
         renderThread.setHolder(renderTarget)
         renderThread.start()
     }
+
 }
