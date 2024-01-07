@@ -1,6 +1,7 @@
 package com.orbits2d.rootactivity
 
 import android.annotation.SuppressLint
+import android.graphics.PointF
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -77,9 +78,11 @@ class RootActivity : AppCompatActivity(), EngineCondition {
         })
 
         binding.renderSurface.setOnTouchListener { view, event ->
+            val touchPos = PointF(event.x, event.y)
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> engine.fingerDown()
+                MotionEvent.ACTION_DOWN -> engine.fingerDown(touchPos)
                 MotionEvent.ACTION_UP -> engine.fingerUp()
+                MotionEvent.ACTION_MOVE->engine.setFingerTouchPosition(touchPos)
             }
             true
         }

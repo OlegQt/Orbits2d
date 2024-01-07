@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.view.SurfaceHolder
 import com.orbits2d.rootactivity.EngineCondition
 
@@ -15,6 +16,7 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
     private var isRunning = true
     private var fps: Int = 0
+    private var touchPos = PointF()
 
     private var paint = Paint()
     private var canvas: Canvas? = null
@@ -25,8 +27,10 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
     private var bufferCondition = Buffer.CALC
 
-    private var touchTime:Long = 0
+    private var touchTime: Long = 0
     private var isTouched = false
+
+    private val scene = RenderScene()
 
     override fun run() {
         canvas = null
@@ -36,16 +40,12 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         while (isRunning) {
             try {
                 canvas = renderSurface.lockCanvas()
-
-                // Очищаем canvas
-                canvas?.drawColor(0)
-
-                // Отрисовка всех объектов на canvas
                 drawObjects(canvas!!)
-
             } finally {
                 if (canvas != null) renderSurface.unlockCanvasAndPost(canvas)
             }
+
+            // Функции, которые непрерывно проверяются
 
             frameCount = fpsCounter(startTime, frameCount)
             if (frameCount == 0) startTime = System.currentTimeMillis()
@@ -58,14 +58,14 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         with(paint) {
             color = Color.WHITE
             style = Paint.Style.FILL
-            textSize=20.0f
+            textSize = 20.0f
         }
         c.drawRect(0.0f, 0.0f, 100.0f, 24.0f, paint)
 
-        paint.color=Color.BLACK
-        c.drawText("FPS $fps",10.0f,20.0f,paint)
+        paint.color = Color.BLACK
+        c.drawText("FPS $fps", 10.0f, 20.0f, paint)
 
-        c.drawBitmap(bitmapBuffer,0.0f,25.0f,paint)
+        c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, paint)
 
     }
 
@@ -80,22 +80,30 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         }
     }
 
-    private fun fingerTouchListener(){
-        if(isTouched){
+    private fun fingerTouchListener() {
+        if (isTouched) {
             val elapsedTime = System.currentTimeMillis() - touchTime
-            engineCondition.setTitle("touch time $elapsedTime")
+
+            val str = StringBuilder().apply {
+                append("touch time $elapsedTime")
+                append("   pos( ${touchPos.x.toInt()}, ${touchPos.y.toInt()})")
+            }.toString()
+
+            engineCondition.setTitle(str)
         }
     }
 
     fun startEngine(newHolder: SurfaceHolder) {
         _renderSurface = newHolder
+        scene.setSceneBounds(renderSurface.surfaceFrame)
 
         val holderRect = renderSurface.surfaceFrame
-        _bitmapBuffer = Bitmap.createBitmap(holderRect.width(),holderRect.height(),Bitmap.Config.RGB_565)
+        _bitmapBuffer =
+            Bitmap.createBitmap(holderRect.width(), holderRect.height(), Bitmap.Config.RGB_565)
         val bufferCanvas = Canvas(bitmapBuffer)
         paint.color = Color.GRAY
         paint.style = Paint.Style.FILL
-        bufferCanvas.drawRect(holderRect,paint)
+        bufferCanvas.drawRect(holderRect, paint)
 
         isRunning = true
         start()
@@ -103,18 +111,22 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         engineCondition.showInfo("Info")
     }
 
+    fun setFingerTouchPosition(point: PointF) {
+        touchPos = point
+    }
+
     fun stopEngine() {
         isRunning = false
         join()
     }
 
-    fun fingerDown(){
+    fun fingerDown(fingerTouchPos: PointF) {
         touchTime = System.currentTimeMillis()
         isTouched = true
-
+        setFingerTouchPosition(fingerTouchPos)
     }
 
-    fun fingerUp(){
+    fun fingerUp() {
         isTouched = false
     }
 
