@@ -1,18 +1,23 @@
-package com.orbits2d
+package com.orbits2d.rootactivity
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import com.orbits2d.Engine
 import com.orbits2d.databinding.ActivityRootBinding
 
-class RootActivity : AppCompatActivity() {
+class RootActivity : AppCompatActivity(),EngineCondition {
     private var _binding: ActivityRootBinding? = null
     private val binding: ActivityRootBinding
         get() = _binding ?: throw Exception("NPE for _binding RootActivity")
 
-    private val renderThread = RenderThread()
+    private val renderThread = Engine(this)
+
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +59,7 @@ class RootActivity : AppCompatActivity() {
 
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                startRenderThread(renderTarget = holder)
+                renderThread.startEngine(newHolder = holder)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
@@ -62,15 +67,15 @@ class RootActivity : AppCompatActivity() {
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {
-                renderThread.running = false
-                renderThread.join()
+                renderThread.stopEngine()
             }
         })
     }
 
-    private fun startRenderThread(renderTarget: SurfaceHolder) {
-        renderThread.setHolder(renderTarget)
-        renderThread.start()
-    }
+    override fun setTitle(titleStr: String) {
+        handler.post {
+            binding.rootBar.title = titleStr
+        }
 
+    }
 }
