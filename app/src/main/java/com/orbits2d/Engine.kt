@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.view.SurfaceHolder
+import com.orbits2d.entities.RoundObject
 import com.orbits2d.rootactivity.EngineCondition
 
 
@@ -65,8 +66,8 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         paint.color = Color.BLACK
         c.drawText("FPS $fps", 10.0f, 20.0f, paint)
 
+        drawSceneOnBuffer()
         c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, paint)
-
     }
 
     private fun fpsCounter(startTime: Long, frameCount: Int): Int {
@@ -93,22 +94,34 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         }
     }
 
+    private fun drawSceneOnBuffer() {
+        val bufferCanvas = Canvas(bitmapBuffer)
+        paint.color = Color.GRAY
+        paint.style = Paint.Style.FILL
+        bufferCanvas.drawRect(renderSurface.surfaceFrame, paint)
+
+        with(paint) {
+            color = Color.CYAN
+        }
+
+        scene.getFullPathList().forEach {
+            bufferCanvas.drawPath(it, paint)
+        }
+    }
+
     fun startEngine(newHolder: SurfaceHolder) {
         _renderSurface = newHolder
         scene.setSceneBounds(renderSurface.surfaceFrame)
 
         val holderRect = renderSurface.surfaceFrame
-        _bitmapBuffer =
-            Bitmap.createBitmap(holderRect.width(), holderRect.height(), Bitmap.Config.RGB_565)
-        val bufferCanvas = Canvas(bitmapBuffer)
-        paint.color = Color.GRAY
-        paint.style = Paint.Style.FILL
-        bufferCanvas.drawRect(holderRect, paint)
+        _bitmapBuffer = Bitmap.createBitmap(
+            holderRect.width(),
+            holderRect.height(),
+            Bitmap.Config.RGB_565
+        )
 
         isRunning = true
         start()
-
-        engineCondition.showInfo("Info")
     }
 
     fun setFingerTouchPosition(point: PointF) {
@@ -124,6 +137,9 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         touchTime = System.currentTimeMillis()
         isTouched = true
         setFingerTouchPosition(fingerTouchPos)
+
+        val op = RoundObject(fingerTouchPos.x,fingerTouchPos.y)
+        scene.addRenderObject(op)
     }
 
     fun fingerUp() {
