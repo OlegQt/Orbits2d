@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.orbits2d.Engine
@@ -67,6 +68,7 @@ class RootActivity : AppCompatActivity(),EngineCondition {
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {
+                handler.removeCallbacksAndMessages(null)
                 renderThread.stopEngine()
             }
         })
@@ -76,6 +78,18 @@ class RootActivity : AppCompatActivity(),EngineCondition {
         handler.post {
             binding.rootBar.title = titleStr
         }
+    }
 
+    override fun setSubTitle(subTitleStr: String) {
+        handler.post {
+            binding.rootBar.subtitle = subTitleStr
+        }
+    }
+
+    override fun showInfo(messageInfo: String) {
+        Snackbar.make(binding.root,messageInfo,Snackbar.LENGTH_INDEFINITE)
+            .setTextMaxLines(20)
+            .setAction("OK") { }
+            .show()
     }
 }

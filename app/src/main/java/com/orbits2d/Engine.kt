@@ -51,14 +51,16 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
     private fun drawObjects(c: Canvas) {
         with(paint) {
-            color = Color.YELLOW
+            color = Color.WHITE
             style = Paint.Style.FILL
-            textSize=24.0f
+            textSize=20.0f
         }
-        c.drawRect(0.0f, 0.0f, 100.0f, 100.0f, paint)
+        c.drawRect(0.0f, 0.0f, 100.0f, 24.0f, paint)
 
         paint.color=Color.BLACK
-        c.drawText(fps.toString(),10.0f,40.0f,paint)
+        c.drawText("FPS $fps",10.0f,20.0f,paint)
+
+        c.drawBitmap(bitmapBuffer,0.0f,25.0f,paint)
 
     }
 
@@ -68,17 +70,25 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
             frameCount + 1
         } else {
             fps = frameCount
-            engineCondition.setTitle("FPS $fps")
+            engineCondition.setSubTitle("FPS $fps")
             0
         }
     }
 
     fun startEngine(newHolder: SurfaceHolder) {
         _renderSurface = newHolder
+
+        val holderRect = renderSurface.surfaceFrame
+        _bitmapBuffer = Bitmap.createBitmap(holderRect.width(),holderRect.height(),Bitmap.Config.RGB_565)
+        val bufferCanvas = Canvas(bitmapBuffer)
+        paint.color = Color.GRAY
+        paint.style = Paint.Style.FILL
+        bufferCanvas.drawRect(holderRect,paint)
+
         isRunning = true
         start()
 
-        engineCondition.setTitle("GameStart")
+        engineCondition.showInfo("Info")
     }
 
     fun stopEngine() {
