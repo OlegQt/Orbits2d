@@ -25,6 +25,9 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
     private var bufferCondition = Buffer.CALC
 
+    private var touchTime:Long = 0
+    private var isTouched = false
+
     override fun run() {
         canvas = null
         var startTime = System.currentTimeMillis()
@@ -46,6 +49,8 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
             frameCount = fpsCounter(startTime, frameCount)
             if (frameCount == 0) startTime = System.currentTimeMillis()
+
+            fingerTouchListener()
         }
     }
 
@@ -75,6 +80,13 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         }
     }
 
+    private fun fingerTouchListener(){
+        if(isTouched){
+            val elapsedTime = System.currentTimeMillis() - touchTime
+            engineCondition.setTitle("touch time $elapsedTime")
+        }
+    }
+
     fun startEngine(newHolder: SurfaceHolder) {
         _renderSurface = newHolder
 
@@ -94,6 +106,16 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
     fun stopEngine() {
         isRunning = false
         join()
+    }
+
+    fun fingerDown(){
+        touchTime = System.currentTimeMillis()
+        isTouched = true
+
+    }
+
+    fun fingerUp(){
+        isTouched = false
     }
 
     enum class Buffer {

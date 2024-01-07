@@ -1,8 +1,10 @@
 package com.orbits2d.rootactivity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.MotionEvent
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
@@ -11,12 +13,12 @@ import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.orbits2d.Engine
 import com.orbits2d.databinding.ActivityRootBinding
 
-class RootActivity : AppCompatActivity(),EngineCondition {
+class RootActivity : AppCompatActivity(), EngineCondition {
     private var _binding: ActivityRootBinding? = null
     private val binding: ActivityRootBinding
         get() = _binding ?: throw Exception("NPE for _binding RootActivity")
 
-    private val renderThread = Engine(this)
+    private val engine = Engine(this)
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -55,12 +57,13 @@ class RootActivity : AppCompatActivity(),EngineCondition {
         })
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setUpSurface() {
         val holder = binding.renderSurface.holder
 
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                renderThread.startEngine(newHolder = holder)
+                engine.startEngine(newHolder = holder)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
@@ -69,9 +72,17 @@ class RootActivity : AppCompatActivity(),EngineCondition {
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {
                 handler.removeCallbacksAndMessages(null)
-                renderThread.stopEngine()
+                engine.stopEngine()
             }
         })
+
+        binding.renderSurface.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> engine.fingerDown()
+                MotionEvent.ACTION_UP -> engine.fingerUp()
+            }
+            true
+        }
     }
 
     override fun setTitle(titleStr: String) {
@@ -87,7 +98,7 @@ class RootActivity : AppCompatActivity(),EngineCondition {
     }
 
     override fun showInfo(messageInfo: String) {
-        Snackbar.make(binding.root,messageInfo,Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(binding.root, messageInfo, Snackbar.LENGTH_INDEFINITE)
             .setTextMaxLines(20)
             .setAction("OK") { }
             .show()
