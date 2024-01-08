@@ -4,6 +4,7 @@ import android.graphics.Path
 import android.graphics.Rect
 import com.orbits2d.entities.Renderable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class RenderScene {
@@ -31,7 +32,7 @@ class RenderScene {
             renderObjects.forEach {
                 it.updatePosition(0.1)
             }
-            //delay(1000)
+            //delay(300)
         }
     }
 }

@@ -5,19 +5,19 @@ import android.graphics.PointF
 import kotlin.math.cos
 import kotlin.math.sin
 
-class RoundObject(x: Float, y: Float) : D3dObject(xPos = x, yPos = y), Renderable {
-    private val radius = 6.0f
+class Atom2d(x: Float, y: Float) : D3dObject(xPos = x, yPos = y), Renderable {
+    private val radius = 40.0f
     private val isSelected = false
 
     private var arrowAngle = 0.0
-    private var spinSpeedRad: Double = 200.0
+    private var spinSpeedRad: Double = 20.0
 
     override fun toPath(): Path {
-        val aPoint = rotateVector(PointF(x, y), PointF(x + radius*2, y), arrowAngle)
+        val aPoint = rotateVector(PointF(x, y), PointF(x + radius, y), arrowAngle)
 
         return Path().apply {
-            addCircle(x, y, radius, Path.Direction.CCW)
-            addCircle(aPoint.x, aPoint.y, 2.0f, Path.Direction.CCW)
+            addCircle(x, y, radius/4, Path.Direction.CCW)
+            addCircle(aPoint.x, aPoint.y, 4.0f, Path.Direction.CCW)
 
         }
     }

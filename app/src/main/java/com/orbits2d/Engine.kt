@@ -6,7 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.view.SurfaceHolder
-import com.orbits2d.entities.RoundObject
+import com.orbits2d.entities.Atom2d
 import com.orbits2d.rootactivity.EngineCondition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +30,8 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
     // Double buffering
     private var _bitmapBuffer: Bitmap? = null
     private val bitmapBuffer: Bitmap get() = _bitmapBuffer ?: throw Exception("NPE bitmap")
+    private var _bitmapBuffer2: Bitmap? = null
+    private val bitmapBuffer2: Bitmap get() = _bitmapBuffer2 ?: throw Exception("NPE bitmap")
 
     private var bufferCondition = Buffer.UPDATE
 
@@ -70,10 +72,13 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
     private fun drawObjects(c: Canvas) {
         with(paint) {
-            color = Color.WHITE
+            color = Color.DKGRAY
             style = Paint.Style.FILL
             textSize = 20.0f
         }
+        //c.drawRect(renderSurface.surfaceFrame,paint)
+
+        paint.color = Color.WHITE
         c.drawRect(0.0f, 0.0f, 100.0f, 24.0f, paint)
 
         paint.color = Color.BLACK
@@ -87,10 +92,11 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         c.drawRect(120.0f, 0.0f, 220.0f, 24.0f, paint)
 
         paint.color = Color.BLACK
-        if (bufferCondition == Buffer.READY) {
-            c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
-        }
 
+        // Переключение буферов
+        //val currentBuffer = if (bufferCondition == Buffer.READY) bitmapBuffer else bitmapBuffer2
+        //c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
+        c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
     }
 
     private fun fpsCounter(startTime: Long, frameCount: Int): Int {
@@ -125,6 +131,11 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
                     try {
                         scene.updateSceneAsync()
                         drawSceneOnBuffer()
+
+                        // Копирование второго буфера в первый
+                        //bitmapBuffer2.eraseColor(Color.DKGRAY)
+                        //val bufferCanvas = Canvas(bitmapBuffer2)
+                        //bufferCanvas.drawBitmap(bitmapBuffer2, 0.0f, 0.0f, null)
                     } finally {
                         bufferCondition = Buffer.READY
                     }
@@ -134,14 +145,14 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
     }
 
     private fun drawSceneOnBuffer() {
+        bitmapBuffer.eraseColor(Color.GRAY)
         val bufferCanvas = Canvas(bitmapBuffer)
-        paint.color = Color.GRAY
+        /*paint.color = Color.GRAY
         paint.style = Paint.Style.FILL
-        bufferCanvas.drawRect(renderSurface.surfaceFrame, paint)
+        bufferCanvas.drawRect(renderSurface.surfaceFrame, paint)*/
 
-        with(paint) {
-            color = Color.CYAN
-        }
+
+        paint.color = Color.BLACK
 
         scene.getFullPathList().forEach {
             bufferCanvas.drawPath(it, paint)
@@ -154,6 +165,11 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
 
         val holderRect = renderSurface.surfaceFrame
         _bitmapBuffer = Bitmap.createBitmap(
+            holderRect.width(),
+            holderRect.height(),
+            Bitmap.Config.RGB_565
+        )
+        _bitmapBuffer2 = Bitmap.createBitmap(
             holderRect.width(),
             holderRect.height(),
             Bitmap.Config.RGB_565
@@ -173,7 +189,7 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
                 Random().nextFloat() * h
             )
 
-            scene.addRenderObject(RoundObject(pos.x, pos.y))
+            scene.addRenderObject(Atom2d(pos.x, pos.y))
         }
     }
 
@@ -192,7 +208,7 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         isTouched = true
         setFingerTouchPosition(fingerTouchPos)
 
-        val op = RoundObject(fingerTouchPos.x, fingerTouchPos.y)
+        val op = Atom2d(fingerTouchPos.x, fingerTouchPos.y)
         scene.addRenderObject(op)
     }
 
