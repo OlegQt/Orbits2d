@@ -87,7 +87,9 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         c.drawRect(120.0f, 0.0f, 220.0f, 24.0f, paint)
 
         paint.color = Color.BLACK
-        c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
+        if (bufferCondition == Buffer.READY) {
+            c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
+        }
 
     }
 
@@ -157,17 +159,15 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
             Bitmap.Config.RGB_565
         )
 
-        multiplication()
-
         isRunning = true
         start()
     }
 
-    private fun multiplication() {
+    fun multiplication() {
         val w = renderSurface.surfaceFrame.width()
         val h = renderSurface.surfaceFrame.height()
 
-        repeat(5000) {
+        repeat(500) {
             val pos = PointF(
                 Random().nextFloat() * w,
                 Random().nextFloat() * h

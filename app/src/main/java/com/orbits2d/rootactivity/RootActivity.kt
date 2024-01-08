@@ -34,28 +34,9 @@ class RootActivity : AppCompatActivity(), EngineCondition {
     }
 
     private fun setUpTabs() {
-        val tabArray = arrayListOf("a_page", "b_page")
-
-        tabArray.forEach {
-            binding.rootTab.addTab(binding.rootTab.newTab().apply {
-                text = it
-            })
+        binding.btnAdd.setOnClickListener {
+            engine.multiplication()
         }
-
-        binding.rootTab.addOnTabSelectedListener(object : OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                tab?.let {
-                }
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                //TODO("Not yet implemented")
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                //TODO("Not yet implemented")
-            }
-        })
     }
 
     @SuppressLint("ClickableViewAccessibility")
