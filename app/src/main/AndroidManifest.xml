@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Orbits2d"
         tools:targetApi="31">
         <activity
-            android:name=".RootActivity"
+            android:name=".rootactivity.RootActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
