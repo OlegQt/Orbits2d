@@ -3,6 +3,8 @@ package com.orbits2d
 import android.graphics.Path
 import android.graphics.Rect
 import com.orbits2d.entities.Renderable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class RenderScene {
     private var sceneBounds = Rect()
@@ -17,9 +19,19 @@ class RenderScene {
         sceneBounds = newBounds
     }
 
-    fun getFullPathList():List<Path>{
+    fun getFullPathList(): List<Path> {
         return renderObjects.map {
             it.toPath()
+        }
+    }
+
+
+    suspend fun updateSceneAsync() {
+        withContext(Dispatchers.Default) {
+            renderObjects.forEach {
+                it.updatePosition(0.1)
+            }
+            //delay(1000)
         }
     }
 }

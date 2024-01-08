@@ -8,6 +8,11 @@ import android.graphics.PointF
 import android.view.SurfaceHolder
 import com.orbits2d.entities.RoundObject
 import com.orbits2d.rootactivity.EngineCondition
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.Random
 
 
 class Engine(private val engineCondition: EngineCondition) : Thread() {
@@ -26,7 +31,7 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
     private var _bitmapBuffer: Bitmap? = null
     private val bitmapBuffer: Bitmap get() = _bitmapBuffer ?: throw Exception("NPE bitmap")
 
-    private var bufferCondition = Buffer.CALC
+    private var bufferCondition = Buffer.UPDATE
 
     private var touchTime: Long = 0
     private var isTouched = false
@@ -37,11 +42,19 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         canvas = null
         var startTime = System.currentTimeMillis()
         var frameCount = 0
+        bufferCondition = Buffer.READY
 
         while (isRunning) {
             try {
                 canvas = renderSurface.lockCanvas()
+
+                // Обновляем сцену
+                updateScene()
+
+                // Прорисовка сцены с буфером
                 drawObjects(canvas!!)
+
+
             } finally {
                 if (canvas != null) renderSurface.unlockCanvasAndPost(canvas)
             }
@@ -66,8 +79,16 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         paint.color = Color.BLACK
         c.drawText("FPS $fps", 10.0f, 20.0f, paint)
 
-        drawSceneOnBuffer()
-        c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, paint)
+        when (bufferCondition) {
+            Buffer.READY -> paint.color = Color.BLACK
+            Buffer.UPDATE -> paint.color = Color.RED
+        }
+
+        c.drawRect(120.0f, 0.0f, 220.0f, 24.0f, paint)
+
+        paint.color = Color.BLACK
+        c.drawBitmap(bitmapBuffer, 0.0f, 25.0f, null)
+
     }
 
     private fun fpsCounter(startTime: Long, frameCount: Int): Int {
@@ -91,6 +112,22 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
             }.toString()
 
             engineCondition.setTitle(str)
+        }
+    }
+
+    private fun updateScene() {
+        if (bufferCondition == Buffer.READY) {
+            GlobalScope.launch {
+                bufferCondition = Buffer.UPDATE
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        scene.updateSceneAsync()
+                        drawSceneOnBuffer()
+                    } finally {
+                        bufferCondition = Buffer.READY
+                    }
+                }
+            }
         }
     }
 
@@ -120,9 +157,26 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
             Bitmap.Config.RGB_565
         )
 
+        multiplication()
+
         isRunning = true
         start()
     }
+
+    private fun multiplication() {
+        val w = renderSurface.surfaceFrame.width()
+        val h = renderSurface.surfaceFrame.height()
+
+        repeat(5000) {
+            val pos = PointF(
+                Random().nextFloat() * w,
+                Random().nextFloat() * h
+            )
+
+            scene.addRenderObject(RoundObject(pos.x, pos.y))
+        }
+    }
+
 
     fun setFingerTouchPosition(point: PointF) {
         touchPos = point
@@ -138,7 +192,7 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
         isTouched = true
         setFingerTouchPosition(fingerTouchPos)
 
-        val op = RoundObject(fingerTouchPos.x,fingerTouchPos.y)
+        val op = RoundObject(fingerTouchPos.x, fingerTouchPos.y)
         scene.addRenderObject(op)
     }
 
@@ -147,6 +201,6 @@ class Engine(private val engineCondition: EngineCondition) : Thread() {
     }
 
     enum class Buffer {
-        READY, CALC
+        READY, UPDATE
     }
 }

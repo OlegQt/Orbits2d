@@ -33,7 +33,7 @@ class RoundObject(x: Float, y: Float) : D3dObject(xPos = x, yPos = y), Renderabl
         return PointF(x.toFloat(), y.toFloat())
     }
 
-    suspend fun updatePosition(deltaTime: Double) {
+    override suspend fun updatePosition(deltaTime: Double) {
        arrowAngle += spinSpeedRad * deltaTime
     }
 }
